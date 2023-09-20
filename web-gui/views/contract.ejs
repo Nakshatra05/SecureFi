@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contract</title>
+    <link rel="stylesheet" href="/css/contract.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1 id="name">SecureFi</h1>
+        <h2 id="auditor">Auditor : none</h2>
+        <h3 id="contract"><%=name %></h3>
+        <div class="text">
+            <div id="main_code">
+                <pre>
+// SPDX-License-Identifier: MIT
+// DO NOT USE IN PRODUCTION
+// Ethernaut Lvl. 10 - Reentrance
+pragma solidity >0.8.0;
+
+contract Target {
+  
+  mapping(address => uint) public balances;
+
+  function deposit(address _to) public payable {
+    balances[_to] = balances[_to] + msg.value;
+  }
+
+  function balanceOf(address _who) public view returns (uint balance) {
+    return balances[_who];
+  }
+
+  // This function has a reentrancy vulnerability
+  function withdraw(uint _amount) public {
+    if(balances[msg.sender] >= _amount) {
+      (bool result,) = msg.sender.call{value:_amount}("");
+      if(result) {
+        _amount;
+      }
+      unchecked {
+        balances[msg.sender] -= _amount;
+      }
+    }
+  }
+
+  constructor() payable {}
+
+  receive() external payable {}
+}
+                </pre>
+            </div>
+
+            <textarea id="auditor_code" rows="4" cols="50">
+// SPDX-License-Identifier: MIT
+// Kindly write your logic in exploit() function declared . 
+pragma solidity >0.8.0;
+
+contract Exploiter {
+    function exploit() public payable {
+    }
+}
+              </textarea>
+            <br>
+        </div>
+        <button id="audit">Audit</button>
+    </div>
+</body>
+<script src="/js/contract.js"></script>
+</html>
